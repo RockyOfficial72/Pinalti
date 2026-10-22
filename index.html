@@ -2,264 +2,616 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rocky VS Pak Sidik</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROCKY VS PAK SIDIK - PENALTI 3D</title>
 
 <style>
-
 body{
     margin:0;
-    text-align:center;
-    font-family:Arial,sans-serif;
-    background:#2e7d32;
-    color:white;
-}
-
-h1{
-    margin-top:15px;
-}
-
-#skor{
-    font-size:24px;
-    margin-bottom:10px;
-}
-
-#lapangan{
-    position:relative;
-    width:100%;
-    height:500px;
-    background:linear-gradient(#4caf50,#2e7d32);
     overflow:hidden;
-    border-top:4px solid white;
+    font-family:Arial,sans-serif;
+    background:#000;
 }
 
-#gawang{
+#scoreboard{
     position:absolute;
-    top:20px;
+    top:10px;
     left:50%;
     transform:translateX(-50%);
-    font-size:120px;
+    color:white;
+    background:rgba(0,0,0,.7);
+    padding:10px 20px;
+    border-radius:12px;
+    z-index:999;
+    font-size:24px;
 }
 
-#kiper{
+#msg{
     position:absolute;
-    top:100px;
+    top:80px;
     left:50%;
     transform:translateX(-50%);
-    font-size:80px;
-    transition:all .4s ease;
-}
-
-#kiperNama{
-    color:yellow;
+    color:white;
+    font-size:34px;
     font-weight:bold;
-    font-size:18px;
+    text-shadow:2px 2px 5px black;
+    z-index:999;
 }
 
-#bola{
-    position:absolute;
-    bottom:120px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:45px;
-    transition:all .8s ease;
-}
-
-#pemain{
+#powerWrap{
     position:absolute;
     bottom:20px;
     left:50%;
     transform:translateX(-50%);
+    width:320px;
+    height:24px;
+    border:2px solid white;
+    background:#222;
 }
 
-#rocky{
-    font-size:90px;
-    position:relative;
-    display:inline-block;
+#power{
+    width:0%;
+    height:100%;
+    background:lime;
 }
-
-#pemainNama{
-    font-size:18px;
-    font-weight:bold;
-}
-
-button{
-    padding:12px 24px;
-    margin:10px;
-    font-size:18px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-#hasil{
-    font-size:28px;
-    font-weight:bold;
-    margin:15px;
-}
-
-/* Animasi lari */
-
-@keyframes lariRocky{
-    0%{left:0;}
-    50%{left:30px;}
-    100%{left:0;}
-}
-
-.lari{
-    animation:lariRocky .8s ease;
-}
-
-/* Animasi tendangan */
-
-@keyframes tendangRocky{
-    0%{
-        transform:rotate(0deg);
-    }
-
-    50%{
-        transform:rotate(-20deg);
-    }
-
-    100%{
-        transform:rotate(20deg);
-    }
-}
-
-.tendang{
-    animation:tendangRocky .4s ease;
-}
-
 </style>
 </head>
 
 <body>
 
-<h1>⚽ Rocky VS Pak Sidik 🥅</h1>
-
-<div id="skor">Skor: 0</div>
-
-<div id="lapangan">
-
-    <div id="gawang">🥅</div>
-
-    <div id="kiper">
-        🧤
-        <div id="kiperNama">Pak Sidik</div>
-    </div>
-
-    <div id="bola">⚽</div>
-
-    <div id="pemain">
-        <div id="rocky">🧍‍♂️</div>
-        <div id="pemainNama">Rocky</div>
-    </div>
-
+<div id="scoreboard">
+⚽ ROCKY #7 VS 🧤 PAK SIDIK #1 |
+SKOR : <span id="score">0</span>
 </div>
 
-<div>
-    <button onclick="tendang('kiri')">⬅️ Kiri</button>
-    <button onclick="tendang('tengah')">⬆️ Tengah</button>
-    <button onclick="tendang('kanan')">➡️ Kanan</button>
+<div id="msg"></div>
+
+<div id="powerWrap">
+<div id="power"></div>
 </div>
 
-<div id="hasil"></div>
+<script type="module">
 
-<script>
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 
-let skor = 0;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x75cfff);
 
-function suaraGol(){
+const camera = new THREE.PerspectiveCamera(
+75,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
 
-    if('speechSynthesis' in window){
+const renderer = new THREE.WebGLRenderer({
+antialias:true
+});
 
-        let ucapan =
-        new SpeechSynthesisUtterance("Gol Rocky");
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
 
-        ucapan.lang = "id-ID";
+document.body.appendChild(renderer.domElement);
 
-        speechSynthesis.speak(ucapan);
-    }
+////////////////////////////////////////////////////////
+// LIGHT
+////////////////////////////////////////////////////////
+
+const ambient =
+new THREE.AmbientLight(
+0xffffff,
+1.5
+);
+
+scene.add(ambient);
+
+const sun =
+new THREE.DirectionalLight(
+0xffffff,
+2
+);
+
+sun.position.set(
+15,
+20,
+10
+);
+
+scene.add(sun);
+
+////////////////////////////////////////////////////////
+// FIELD
+////////////////////////////////////////////////////////
+
+const field =
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+60,
+60
+),
+new THREE.MeshPhongMaterial({
+color:0x28a428
+})
+);
+
+field.rotation.x =
+-Math.PI/2;
+
+scene.add(field);
+
+////////////////////////////////////////////////////////
+// GOAL
+////////////////////////////////////////////////////////
+
+const goal =
+new THREE.Mesh(
+new THREE.BoxGeometry(
+8,
+4,
+0.3
+),
+new THREE.MeshBasicMaterial({
+wireframe:true,
+color:'white'
+})
+);
+
+goal.position.set(
+0,
+2,
+-15
+);
+
+scene.add(goal);
+
+////////////////////////////////////////////////////////
+// ROCKY
+////////////////////////////////////////////////////////
+
+const player =
+new THREE.Group();
+
+scene.add(player);
+
+const torso =
+new THREE.Mesh(
+new THREE.BoxGeometry(
+1,
+2,
+0.6
+),
+new THREE.MeshStandardMaterial({
+color:'blue'
+})
+);
+
+torso.position.y=2;
+
+player.add(torso);
+
+const head =
+new THREE.Mesh(
+new THREE.SphereGeometry(
+0.4,
+16,
+16
+),
+new THREE.MeshStandardMaterial({
+color:'#ffcc99'
+})
+);
+
+head.position.y=3.5;
+
+player.add(head);
+
+const rightLeg =
+new THREE.Mesh(
+new THREE.BoxGeometry(
+0.25,
+1.3,
+0.25
+),
+new THREE.MeshStandardMaterial({
+color:'white'
+})
+);
+
+rightLeg.position.set(
+0.3,
+0.7,
+0
+);
+
+player.add(rightLeg);
+
+const leftLeg =
+new THREE.Mesh(
+new THREE.BoxGeometry(
+0.25,
+1.3,
+0.25
+),
+new THREE.MeshStandardMaterial({
+color:'white'
+})
+);
+
+leftLeg.position.set(
+-0.3,
+0.7,
+0
+);
+
+player.add(leftLeg);
+
+player.position.z=3;
+
+////////////////////////////////////////////////////////
+// PAK SIDIK
+////////////////////////////////////////////////////////
+
+const keeper =
+new THREE.Group();
+
+scene.add(keeper);
+
+const keeperBody =
+new THREE.Mesh(
+new THREE.BoxGeometry(
+1.1,
+2.3,
+0.7
+),
+new THREE.MeshStandardMaterial({
+color:'red'
+})
+);
+
+keeperBody.position.y=1.3;
+
+keeper.add(keeperBody);
+
+const keeperHead =
+new THREE.Mesh(
+new THREE.SphereGeometry(
+0.4,
+16,
+16
+),
+new THREE.MeshStandardMaterial({
+color:'#ffcc99'
+})
+);
+
+keeperHead.position.y=2.9;
+
+keeper.add(keeperHead);
+
+keeper.position.set(
+0,
+0,
+-14
+);
+
+////////////////////////////////////////////////////////
+// BALL
+////////////////////////////////////////////////////////
+
+const ball =
+new THREE.Mesh(
+new THREE.SphereGeometry(
+0.4,
+32,
+32
+),
+new THREE.MeshStandardMaterial({
+color:'white'
+})
+);
+
+ball.position.set(
+0,
+0.4,
+0
+);
+
+scene.add(ball);
+
+////////////////////////////////////////////////////////
+
+camera.position.set(
+0,
+4,
+8
+);
+
+////////////////////////////////////////////////////////
+
+let score = 0;
+
+let power = 0;
+
+let charging = false;
+
+let kicking = false;
+
+let kickTime = 0;
+
+let diveDir = 0;
+
+const velocity =
+new THREE.Vector3();
+
+////////////////////////////////////////////////////////
+// INPUT
+////////////////////////////////////////////////////////
+
+document.addEventListener(
+"mousedown",
+()=>{
+charging=true;
+});
+
+document.addEventListener(
+"mouseup",
+()=>{
+charging=false;
+shoot();
+});
+
+////////////////////////////////////////////////////////
+
+function shoot()
+{
+if(kicking) return;
+
+kicking=true;
+
+kickTime=0;
+
+diveDir =
+Math.random()<0.5?-1:1;
+
+velocity.set(
+
+(Math.random()-0.5)*0.20,
+
+0.09,
+
+-(0.25+(power*0.008))
+
+);
+
+power=0;
+
+document
+.getElementById("power")
+.style.width="0%";
 }
 
-function tendang(pilihan){
+////////////////////////////////////////////////////////
 
-    const rocky = document.getElementById("rocky");
-    const bola = document.getElementById("bola");
-    const kiper = document.getElementById("kiper");
+function updatePower()
+{
+if(!charging) return;
 
-    rocky.classList.add("lari");
+power += 1.2;
 
-    const arah = ["kiri","tengah","kanan"];
-    const arahKiper =
-    arah[Math.floor(Math.random()*3)];
+if(power>100)
+power=100;
 
-    if(arahKiper==="kiri"){
-        kiper.style.left="35%";
-    }
-    else if(arahKiper==="kanan"){
-        kiper.style.left="65%";
-    }
-    else{
-        kiper.style.left="50%";
-    }
-
-    setTimeout(()=>{
-
-        rocky.classList.remove("lari");
-        rocky.classList.add("tendang");
-
-        setTimeout(()=>{
-            rocky.classList.remove("tendang");
-        },400);
-
-        if(pilihan==="kiri"){
-            bola.style.left="35%";
-        }
-        else if(pilihan==="kanan"){
-            bola.style.left="65%";
-        }
-        else{
-            bola.style.left="50%";
-        }
-
-        bola.style.bottom="340px";
-
-        setTimeout(()=>{
-
-            if(pilihan===arahKiper){
-
-                document.getElementById("hasil")
-                .innerHTML =
-                "🧤 Pak Sidik Menyelamatkan Bola!";
-
-            }
-            else{
-
-                skor++;
-
-                document.getElementById("skor")
-                .innerHTML =
-                "Skor: " + skor;
-
-                document.getElementById("hasil")
-                .innerHTML =
-                "🎉⚽ GOOOOL ROCKY!";
-
-                suaraGol();
-            }
-
-            setTimeout(()=>{
-
-                bola.style.left="50%";
-                bola.style.bottom="120px";
-
-            },500);
-
-        },800);
-
-    },800);
+document
+.getElementById("power")
+.style.width=
+power+"%";
 }
+
+////////////////////////////////////////////////////////
+// ROCKY ANIMATION
+////////////////////////////////////////////////////////
+
+function updateRocky()
+{
+if(!kicking) return;
+
+kickTime += 0.25;
+
+rightLeg.rotation.x =
+-Math.sin(kickTime)*2.2;
+
+leftLeg.rotation.x =
+Math.sin(kickTime)*0.4;
+
+torso.rotation.z =
+Math.sin(kickTime)*0.08;
+
+head.lookAt(ball.position);
+
+if(kickTime>3)
+{
+kicking=false;
+
+rightLeg.rotation.x=0;
+leftLeg.rotation.x=0;
+torso.rotation.z=0;
+}
+}
+
+////////////////////////////////////////////////////////
+// KEEPER ANIMATION
+////////////////////////////////////////////////////////
+
+function updateKeeper()
+{
+keeper.position.x +=
+(diveDir*3 -
+keeper.position.x)
+*0.02;
+
+keeper.position.y =
+Math.abs(
+Math.sin(
+Date.now()*0.003
+)
+)*0.2;
+}
+
+////////////////////////////////////////////////////////
+// BALL PHYSICS
+////////////////////////////////////////////////////////
+
+function updateBall()
+{
+ball.position.add(
+velocity
+);
+
+velocity.y -= 0.002;
+
+ball.rotation.x += 0.1;
+ball.rotation.z += 0.1;
+
+if(ball.position.y < 0.4)
+{
+ball.position.y = 0.4;
+}
+
+if(ball.position.z < -15)
+{
+checkGoal();
+}
+}
+
+////////////////////////////////////////////////////////
+
+function checkGoal()
+{
+if(
+Math.abs(
+ball.position.x
+) < 3.3
+)
+{
+score++;
+
+document
+.getElementById("score")
+.innerText = score;
+
+showMessage(
+"🔥 ROCKY CETAK GOL!"
+);
+}
+else
+{
+showMessage(
+"🧤 PAK SIDIK MENYELAMATKAN!"
+);
+}
+
+resetBall();
+}
+
+////////////////////////////////////////////////////////
+
+function showMessage(text)
+{
+document
+.getElementById("msg")
+.innerText=text;
+
+setTimeout(()=>{
+document
+.getElementById("msg")
+.innerText="";
+},2500);
+}
+
+////////////////////////////////////////////////////////
+
+function resetBall()
+{
+ball.position.set(
+0,
+0.4,
+0
+);
+
+velocity.set(
+0,
+0,
+0
+);
+
+keeper.position.x=0;
+}
+
+////////////////////////////////////////////////////////
+// CAMERA
+////////////////////////////////////////////////////////
+
+function updateCamera()
+{
+camera.position.lerp(
+
+new THREE.Vector3(
+ball.position.x,
+4,
+ball.position.z+8
+),
+
+0.03
+
+);
+
+camera.lookAt(
+ball.position
+);
+}
+
+////////////////////////////////////////////////////////
+
+function animate()
+{
+requestAnimationFrame(
+animate
+);
+
+updatePower();
+
+updateRocky();
+
+updateKeeper();
+
+updateBall();
+
+updateCamera();
+
+renderer.render(
+scene,
+camera
+);
+}
+
+animate();
+
+window.addEventListener(
+'resize',
+()=>{
+camera.aspect=
+window.innerWidth/
+window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+});
 
 </script>
 
