@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocky VS Pak Sidik</title>
+
+<style>
+
+body{
+    margin:0;
+    text-align:center;
+    font-family:Arial,sans-serif;
+    background:#2e7d32;
+    color:white;
+}
+
+h1{
+    margin-top:15px;
+}
+
+#skor{
+    font-size:24px;
+    margin-bottom:10px;
+}
+
+#lapangan{
+    position:relative;
+    width:100%;
+    height:500px;
+    background:linear-gradient(#4caf50,#2e7d32);
+    overflow:hidden;
+    border-top:4px solid white;
+}
+
+#gawang{
+    position:absolute;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:120px;
+}
+
+#kiper{
+    position:absolute;
+    top:100px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:80px;
+    transition:all .4s ease;
+}
+
+#kiperNama{
+    color:yellow;
+    font-weight:bold;
+    font-size:18px;
+}
+
+#bola{
+    position:absolute;
+    bottom:120px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:45px;
+    transition:all .8s ease;
+}
+
+#pemain{
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+#rocky{
+    font-size:90px;
+    position:relative;
+    display:inline-block;
+}
+
+#pemainNama{
+    font-size:18px;
+    font-weight:bold;
+}
+
+button{
+    padding:12px 24px;
+    margin:10px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+#hasil{
+    font-size:28px;
+    font-weight:bold;
+    margin:15px;
+}
+
+/* Animasi lari */
+
+@keyframes lariRocky{
+    0%{left:0;}
+    50%{left:30px;}
+    100%{left:0;}
+}
+
+.lari{
+    animation:lariRocky .8s ease;
+}
+
+/* Animasi tendangan */
+
+@keyframes tendangRocky{
+    0%{
+        transform:rotate(0deg);
+    }
+
+    50%{
+        transform:rotate(-20deg);
+    }
+
+    100%{
+        transform:rotate(20deg);
+    }
+}
+
+.tendang{
+    animation:tendangRocky .4s ease;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>⚽ Rocky VS Pak Sidik 🥅</h1>
+
+<div id="skor">Skor: 0</div>
+
+<div id="lapangan">
+
+    <div id="gawang">🥅</div>
+
+    <div id="kiper">
+        🧤
+        <div id="kiperNama">Pak Sidik</div>
+    </div>
+
+    <div id="bola">⚽</div>
+
+    <div id="pemain">
+        <div id="rocky">🧍‍♂️</div>
+        <div id="pemainNama">Rocky</div>
+    </div>
+
+</div>
+
+<div>
+    <button onclick="tendang('kiri')">⬅️ Kiri</button>
+    <button onclick="tendang('tengah')">⬆️ Tengah</button>
+    <button onclick="tendang('kanan')">➡️ Kanan</button>
+</div>
+
+<div id="hasil"></div>
+
+<script>
+
+let skor = 0;
+
+function suaraGol(){
+
+    if('speechSynthesis' in window){
+
+        let ucapan =
+        new SpeechSynthesisUtterance("Gol Rocky");
+
+        ucapan.lang = "id-ID";
+
+        speechSynthesis.speak(ucapan);
+    }
+}
+
+function tendang(pilihan){
+
+    const rocky = document.getElementById("rocky");
+    const bola = document.getElementById("bola");
+    const kiper = document.getElementById("kiper");
+
+    rocky.classList.add("lari");
+
+    const arah = ["kiri","tengah","kanan"];
+    const arahKiper =
+    arah[Math.floor(Math.random()*3)];
+
+    if(arahKiper==="kiri"){
+        kiper.style.left="35%";
+    }
+    else if(arahKiper==="kanan"){
+        kiper.style.left="65%";
+    }
+    else{
+        kiper.style.left="50%";
+    }
+
+    setTimeout(()=>{
+
+        rocky.classList.remove("lari");
+        rocky.classList.add("tendang");
+
+        setTimeout(()=>{
+            rocky.classList.remove("tendang");
+        },400);
+
+        if(pilihan==="kiri"){
+            bola.style.left="35%";
+        }
+        else if(pilihan==="kanan"){
+            bola.style.left="65%";
+        }
+        else{
+            bola.style.left="50%";
+        }
+
+        bola.style.bottom="340px";
+
+        setTimeout(()=>{
+
+            if(pilihan===arahKiper){
+
+                document.getElementById("hasil")
+                .innerHTML =
+                "🧤 Pak Sidik Menyelamatkan Bola!";
+
+            }
+            else{
+
+                skor++;
+
+                document.getElementById("skor")
+                .innerHTML =
+                "Skor: " + skor;
+
+                document.getElementById("hasil")
+                .innerHTML =
+                "🎉⚽ GOOOOL ROCKY!";
+
+                suaraGol();
+            }
+
+            setTimeout(()=>{
+
+                bola.style.left="50%";
+                bola.style.bottom="120px";
+
+            },500);
+
+        },800);
+
+    },800);
+}
+
+</script>
+
+</body>
+</html>
